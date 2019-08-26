@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -894,4 +895,29 @@ func (rc *RongCloud) HistoryRemove(date string) error {
 	}
 	return nil
 
+}
+
+// BroadcastRecall 撤回广播消息方法
+func (rc *RongCloud) BroadcastRecall(uid, msgID string) error {
+	req := httplib.Post(rc.rongCloudURI + "/message/broadcast." + ReqType)
+	req.SetTimeout(time.Second*rc.timeout, time.Second*rc.timeout)
+	rc.fillHeader(req)
+	req.Param("fromUserId", uid)
+	req.Param("content", fmt.Sprintf(`{"messageUId": "%s", "conversationType": "6", "isAdmin": 0, "isDelete": 1}`, msgID))
+	req.Param("objectName", "RC:RcCmd")
+
+	rep, err := req.Bytes()
+	if err != nil {
+		rc.urlError(err)
+		return err
+	}
+
+	var code CodeResult
+	if err := json.Unmarshal(rep, &code); err != nil {
+		return err
+	}
+	if code.Code != 200 {
+		return code
+	}
+	return nil
 }
