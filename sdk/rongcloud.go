@@ -37,7 +37,6 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/astaxie/beego/httplib"
@@ -68,8 +67,8 @@ var (
 		numTimeout:      NUMTIMEOUT,
 		count:           0,
 	}
-	rc   *RongCloud
-	once sync.Once
+	// rc   *RongCloud
+	// once sync.Once
 )
 
 // RongCloud appKey appSecret extra
@@ -126,26 +125,23 @@ func fillJSONHeader(req *httplib.BeegoHTTPRequest) {
 
 // NewRongCloud 创建 RongCloud 对象
 func NewRongCloud(appKey, appSecret string, options ...rongCloudOption) *RongCloud {
-	once.Do(func() {
-		// 默认扩展配置
-		defaultRongCloud := defaultExtra
-		rc = &RongCloud{
-			appKey:         appKey,
-			appSecret:      appSecret,
-			rongCloudExtra: &defaultRongCloud,
-		}
-	},
-	)
+	// 默认扩展配置
+	defaultRongCloud := defaultExtra
+	rc := &RongCloud{
+		appKey:         appKey,
+		appSecret:      appSecret,
+		rongCloudExtra: &defaultRongCloud,
+	}
 	for _, option := range options {
 		option(rc)
 	}
 	return rc
 }
 
-// GetRongCloud 获取 RongCloud 对象
-func GetRongCloud() *RongCloud {
-	return rc
-}
+// // GetRongCloud 获取 RongCloud 对象
+// func GetRongCloud() *RongCloud {
+// 	return rc
+// }
 
 // changeURI 切换 Api 服务器地址
 func (rc *RongCloud) changeURI() {
